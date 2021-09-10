@@ -1,10 +1,14 @@
+import { authService } from "fbase";
 import { useState } from "react";
 import PropTypes from "prop-types";
+// prettier-ignore
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 
 const Auth = (props) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [newAccount, setNewAccount] = useState(true);
+  const [error, setError] = useState("");
 
   const onChange = (e) => {
     const { name, value } = e.target;
@@ -12,8 +16,22 @@ const Auth = (props) => {
     if (name === "password") setPassword(value);
   };
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
+    try {
+      let data;
+      if (newAccount) {
+        // prettier-ignore
+        data = await createUserWithEmailAndPassword(authService,email,password);
+      } else {
+        // prettier-ignore
+        data = await signInWithEmailAndPassword(authService,email,password);
+      }
+      console.log(data);
+    } catch (error) {
+      setError(error.message);
+    }
+
     if (newAccount) setNewAccount(true);
     setNewAccount(false);
   };
@@ -42,6 +60,7 @@ const Auth = (props) => {
           type="submit"
           value={newAccount ? "Create Account" : "Log In"}
         />
+        <p> {error}</p>
       </form>
       <div>
         <button>Continue With Google</button>
